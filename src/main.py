@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import re
 
 username = st.text_input("Enter Chess.com username:")
 timeframe = 12
@@ -60,4 +61,11 @@ if username:
         }
     
     stats = calculate_stats(username, all_games)
-    st.write(stats)
+    
+    def extract_moves(game):
+        moves = re.sub(r'\{.*?}', '', game["pgn"]) #Removes clock percentages
+        moves = re.sub(r'\[.*?]', '', moves) #Removes metadata
+        moves = re.sub(r'\d+(\.\.\.|\.)', '', moves) #Removes move numbers
+        st.write(moves)
+
+    extract_moves(all_games[1])
