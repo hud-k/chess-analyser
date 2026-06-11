@@ -2,6 +2,72 @@ import streamlit as st
 import requests
 import re
 
+LOSS_STATES = {"checkmated", "resigned", "abandoned", "timeout"}
+
+def get_result(username, game):
+    if game["white"]["username"] == username:
+        return game["white"]["result"]
+    else:
+        return game["black"]["result"]
+
+def colour_stats(username, all_games):
+    white_games_won = 0
+    white_games_lost = 0
+    white_total_games = 0
+
+    black_games_won = 0
+    black_games_lost = 0
+    black_total_games = 0
+
+    for game in all_games:
+        if game["white"]["username"] == username:
+            white_result = get_result(username, game)
+            white_total_games+=1
+
+            if white_result == "win":
+                white_games_won+=1
+            elif white_result in LOSS_STATES:
+                white_games_lost+=1
+
+        else:
+            black_result = get_result(username, game)
+            black_total_games+=1
+
+            if black_result == "win":
+                black_games_won+=1
+            elif black_result in LOSS_STATES:
+                black_games_lost+=1
+    
+    white_games_drawn = white_total_games - (white_games_won + white_games_lost)
+    black_games_drawn = black_total_games - (black_games_won + black_games_lost)
+
+    return {
+        "white": {"wins": white_games_won, "losses": white_games_lost, "draws": white_games_drawn},
+        "black": {"wins": black_games_won, "losses": black_games_lost, "draws": black_games_drawn}
+    }
+
+def extract_opening(game):
+    opening_url = game.get("eco", None)
+    if not opening_url:
+        return "Unknown"
+    opening = opening_url.rsplit("/", 1)[-1]
+    opening = opening.replace("-", " ")
+    return opening
+    
+def opening_stats(username, all_games):
+    opening_dict = {}
+    for game in all_games:
+        opening = extract_opening(game)
+        result = get_result(username, game)
+        opening_dict.setdefault(opening, {"wins": 0, "losses": 0, "draws": 0})
+        if result == "win":
+            opening_dict[opening]["wins"]+=1
+        elif result in LOSS_STATES:
+            opening_dict[opening]["losses"]+=1
+        else:
+            opening_dict[opening]["draws"]+=1
+    st.write(opening_dict)
+
 username = st.text_input("Enter Chess.com username:")
 timeframe = 12
 
@@ -21,44 +87,11 @@ if username:
         game_response = requests.get(month, headers=headers)
         games = game_response.json()['games']
         for game in games:
-            all_games.append(game)
-    
-    def colour_stats(username, all_games):
-        white_games_won = 0
-        white_games_lost = 0
-        white_total_games = 0
+            if game["rated"] and game["rules"] == "chess":
+                all_games.append(game)
 
-        black_games_won = 0
-        black_games_lost = 0
-        black_total_games = 0
-
-        loss_states = {"checkmated", "resigned", "abandoned", "timeout"}
-        for game in all_games:
-
-            white_result = game["white"]["result"]
-            black_result = game["black"]["result"]
-
-            if game["white"]["username"] == username:
-                white_total_games+=1
-                if white_result == "win":
-                    white_games_won+=1
-                elif white_result in loss_states:
-                    white_games_lost+=1
-
-            else:
-                black_total_games+=1
-                if black_result == "win":
-                    black_games_won+=1
-                elif black_result in loss_states:
-                    black_games_lost+=1
-        
-        white_games_drawn = white_total_games - (white_games_won + white_games_lost)
-        black_games_drawn = black_total_games - (black_games_won + black_games_lost)
-
-        return {
-            "white": {"wins": white_games_won, "losses": white_games_lost, "draws": white_games_drawn},
-            "black": {"wins": black_games_won, "losses": black_games_lost, "draws": black_games_drawn}
-        }
-    
     stats = colour_stats(username, all_games)
+    opening_stats(username, all_games)
+
     
+            
