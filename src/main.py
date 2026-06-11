@@ -23,7 +23,7 @@ if username:
         for game in games:
             all_games.append(game)
     
-    def calculate_stats(username, all_games):
+    def colour_stats(username, all_games):
         white_games_won = 0
         white_games_lost = 0
         white_total_games = 0
@@ -60,12 +60,5 @@ if username:
             "black": {"wins": black_games_won, "losses": black_games_lost, "draws": black_games_drawn}
         }
     
-    stats = calculate_stats(username, all_games)
+    stats = colour_stats(username, all_games)
     
-    def extract_moves(game):
-        moves = re.sub(r'\{.*?}', '', game["pgn"]) #Removes clock percentages
-        moves = re.sub(r'\[.*?]', '', moves) #Removes metadata
-        moves = re.sub(r'\d+(\.\.\.|\.)', '', moves) #Removes move numbers
-        st.write(moves)
-
-    extract_moves(all_games[1])
