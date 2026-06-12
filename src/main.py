@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import re
+from display import display_colour_stats, display_opening_stats
 
 LOSS_STATES = {"checkmated", "resigned", "abandoned", "timeout"}
 
@@ -42,8 +43,8 @@ def colour_stats(username, all_games):
     black_games_drawn = black_total_games - (black_games_won + black_games_lost)
 
     return {
-        "white": {"wins": white_games_won, "losses": white_games_lost, "draws": white_games_drawn},
-        "black": {"wins": black_games_won, "losses": black_games_lost, "draws": black_games_drawn}
+        "white": {"wins": white_games_won, "losses": white_games_lost, "draws": white_games_drawn, "total": white_total_games},
+        "black": {"wins": black_games_won, "losses": black_games_lost, "draws": black_games_drawn, "total": black_total_games}
     }
 
 def extract_opening(game):
@@ -66,7 +67,7 @@ def opening_stats(username, all_games):
             opening_dict[opening]["losses"]+=1
         else:
             opening_dict[opening]["draws"]+=1
-    st.write(opening_dict)
+    return opening_dict
 
 username = st.text_input("Enter Chess.com username:")
 timeframe = 12
@@ -91,7 +92,9 @@ if username:
                 all_games.append(game)
 
     stats = colour_stats(username, all_games)
-    opening_stats(username, all_games)
+    openings = opening_stats(username, all_games)
+
+    display_colour_stats(stats)
 
     
             
