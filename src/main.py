@@ -95,6 +95,7 @@ if username:
     openings = opening_stats(username, all_games)
 
     display_colour_stats(stats)
+    display_opening_stats(openings)
 
     
             

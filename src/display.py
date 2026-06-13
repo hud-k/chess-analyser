@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 
 def display_colour_stats(stats):
     for colour in stats:
@@ -11,4 +12,10 @@ def display_colour_stats(stats):
         wr.metric(label = "Win rate", value=(f"{round(win_rate, 1)}%"))
 
 def display_opening_stats(openings):
-    pass
+    df = pd.DataFrame({
+        'Opening': list(openings.keys()),
+        'Wins': [openings[o]["wins"] for o in openings],
+        "Losses": [openings[o]["losses"] for o in openings],
+        "Draws": [openings[o]["draws"] for o in openings]
+    })
+    st.dataframe(df, hide_index=True)
