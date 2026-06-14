@@ -14,8 +14,15 @@ def display_colour_stats(stats):
 def display_opening_stats(openings):
     df = pd.DataFrame({
         'Opening': list(openings.keys()),
-        'Wins': [openings[o]["wins"] for o in openings],
-        "Losses": [openings[o]["losses"] for o in openings],
-        "Draws": [openings[o]["draws"] for o in openings]
+        'Wins': [o["wins"] for o in openings.values()],
+        "Losses": [o["losses"] for o in openings.values()],
+        "Draws": [o["draws"] for o in openings.values()],
+        "Win rate %": [opening_win_rate(o) for o in openings.values()]
     })
+    df.sort_values("Win rate %")
     st.dataframe(df, hide_index=True)
+
+def opening_win_rate(o):
+    total = o["wins"] + o["losses"] + o["draws"]
+    win_rate = (o["wins"]/total)*100
+    return round(win_rate, 1)

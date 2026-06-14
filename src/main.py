@@ -1,6 +1,5 @@
 import streamlit as st
 import requests
-import re
 from display import display_colour_stats, display_opening_stats
 
 LOSS_STATES = {"checkmated", "resigned", "abandoned", "timeout"}
@@ -94,8 +93,11 @@ if username:
     stats = colour_stats(username, all_games)
     openings = opening_stats(username, all_games)
 
-    display_colour_stats(stats)
-    display_opening_stats(openings)
+    tab1, tab2 = st.tabs(["Colour Stats", "Openings"])
+    with tab1:
+        display_colour_stats(stats)
+    with tab2:
+        display_opening_stats(openings)
 
     
             
