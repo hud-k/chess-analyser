@@ -19,10 +19,16 @@ def display_opening_stats(openings):
         "Draws": [o["draws"] for o in openings.values()],
         "Win rate %": [opening_win_rate(o) for o in openings.values()]
     })
-    df.sort_values("Win rate %")
+    df.sort_values("Win rate %", ascending=False)
     st.dataframe(df, hide_index=True)
+    return df
 
 def opening_win_rate(o):
     total = o["wins"] + o["losses"] + o["draws"]
     win_rate = (o["wins"]/total)*100
     return round(win_rate, 1)
+
+def opening_bar_chart(df):
+    game_threshold = 3
+    top_games = df[df['Wins'] + df['Losses'] + df['Draws'] >= game_threshold].head(10)
+    st.bar_chart(top_games, x='Opening', y='Win rate %', sort="-Win rate %", horizontal=True, color="red")

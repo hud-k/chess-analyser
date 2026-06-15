@@ -1,8 +1,9 @@
 import streamlit as st
 import requests
-from display import display_colour_stats, display_opening_stats
+from display import display_colour_stats, display_opening_stats, opening_bar_chart
 
 LOSS_STATES = {"checkmated", "resigned", "abandoned", "timeout"}
+st.set_page_config(layout="wide")
 
 def get_result(username, game):
     if game["white"]["username"] == username:
@@ -97,7 +98,12 @@ if username:
     with tab1:
         display_colour_stats(stats)
     with tab2:
-        display_opening_stats(openings)
+        col1, col2 = st.columns(2)
+        with col1:
+            data_frame=display_opening_stats(openings)
+        with col2:
+            st.subheader("Your Best Openings", divider="red")
+            opening_bar_chart(data_frame)
 
     
             
