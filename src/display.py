@@ -32,3 +32,11 @@ def opening_bar_chart(df):
     game_threshold = 3
     top_games = df[df['Wins'] + df['Losses'] + df['Draws'] >= game_threshold].head(10)
     st.bar_chart(top_games, x='Opening', y='Win rate %', sort="-Win rate %", horizontal=True, color="red")
+
+def performance_trends(monthly_stats):
+    df = pd.DataFrame({
+        'Date': list(monthly_stats.keys()),
+        'Win rate %': [m["win_rate"] for m in monthly_stats.values()]
+    })
+
+    st.line_chart(df, x="Date", y="Win rate %", x_label="Date (Year/Month/Day)", color="red")

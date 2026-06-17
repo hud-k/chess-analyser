@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
-from display import display_colour_stats, display_opening_stats, opening_bar_chart
+import datetime
+from display import display_colour_stats, display_opening_stats, opening_bar_chart, performance_trends
 
 LOSS_STATES = {"checkmated", "resigned", "abandoned", "timeout"}
 st.set_page_config(layout="wide")
@@ -11,6 +12,18 @@ def get_result(username, game):
     else:
         return game["black"]["result"]
 
+def monthly_win_rate(username, monthly_games, monthly_stats):
+    total_wins = 0
+    if len(monthly_games) > 0:
+        unix_time = monthly_games[0]["end_time"]  
+        month = str(datetime.date.fromtimestamp(unix_time))
+        for game in monthly_games:
+            result = get_result(username, game)
+            if result == "win":
+                total_wins+=1
+        monthly_stats.setdefault(month, {"win_rate": 0})
+        monthly_stats[month]["win_rate"] = round((total_wins/len(monthly_games))*100, 1)
+      
 def colour_stats(username, all_games):
     white_games_won = 0
     white_games_lost = 0
@@ -83,10 +96,12 @@ if username:
         st.write(f"Error {archives_response.status_code}: Failed to retrieve game data for {username}")
 
     all_games = []
+    monthly_stats = {}
 
     for month in recent_archives:
         game_response = requests.get(month, headers=headers)
         games = game_response.json()['games']
+        monthly_win_rate(username, games, monthly_stats)
         for game in games:
             if game["rated"] and game["rules"] == "chess":
                 all_games.append(game)
@@ -94,7 +109,7 @@ if username:
     stats = colour_stats(username, all_games)
     openings = opening_stats(username, all_games)
 
-    tab1, tab2 = st.tabs(["Colour Stats", "Openings"])
+    tab1, tab2, tab3 = st.tabs(["Colour Stats", "Openings", "Performance Trends"])
     with tab1:
         display_colour_stats(stats)
     with tab2:
@@ -104,6 +119,7 @@ if username:
         with col2:
             st.subheader("Your Best Openings", divider="red")
             opening_bar_chart(data_frame)
-
+    with tab3:
+        performance_trends(monthly_stats)
     
             
