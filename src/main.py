@@ -7,7 +7,7 @@ LOSS_STATES = {"checkmated", "resigned", "abandoned", "timeout"}
 st.set_page_config(layout="wide")
 
 def get_result(username, game):
-    if game["white"]["username"] == username:
+    if game["white"]["username"].lower() == username.lower():
         return game["white"]["result"]
     else:
         return game["black"]["result"]
@@ -34,7 +34,7 @@ def colour_stats(username, all_games):
     black_total_games = 0
 
     for game in all_games:
-        if game["white"]["username"] == username:
+        if game["white"]["username"].lower() == username.lower():
             white_result = get_result(username, game)
             white_total_games+=1
 
@@ -82,18 +82,16 @@ def opening_stats(username, all_games):
             opening_dict[opening]["draws"]+=1
     return opening_dict
 
-username = st.text_input("Enter Chess.com username:")
-timeframe = 12
-
-if username:
+@st.cache_data(show_spinner=False)
+def fetch_games(username):
     headers = {"User-Agent": "Mozilla/5.0"}
     archives_response = requests.get(f"https://api.chess.com/pub/player/{username}/games/archives", headers=headers)
 
-    if archives_response.status_code == 200:
-        archives = archives_response.json()['archives']
-        recent_archives = archives[-12:]
-    else:
-        st.write(f"Error {archives_response.status_code}: Failed to retrieve game data for {username}")
+    if archives_response.status_code != 200:
+        return None, None
+    
+    archives = archives_response.json()['archives']
+    recent_archives = archives[-12:]
 
     all_games = []
     monthly_stats = {}
@@ -105,6 +103,18 @@ if username:
         for game in games:
             if game["rated"] and game["rules"] == "chess":
                 all_games.append(game)
+    return all_games, monthly_stats
+
+username = st.text_input("Enter Chess.com username:")
+timeframe = 12
+
+if username:
+    with st.spinner("Fetching games..."):
+        all_games, monthly_stats = fetch_games(username)
+
+    if all_games is None:
+        st.error(f"User '{username}' not found")
+        st.stop()
 
     stats = colour_stats(username, all_games)
     openings = opening_stats(username, all_games)

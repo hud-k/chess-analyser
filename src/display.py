@@ -8,7 +8,10 @@ def display_colour_stats(stats):
         w.metric(label="Wins", value=stats[colour]["wins"])
         l.metric(label="Losses", value=stats[colour]["losses"])
         d.metric(label="Draws", value=stats[colour]["draws"])
-        win_rate = (stats[colour]["wins"]/stats[colour]["total"])*100
+        if stats[colour]["total"] !=0:
+            win_rate = (stats[colour]["wins"]/stats[colour]["total"])*100
+        else:
+            win_rate = 0
         wr.metric(label = "Win rate", value=(f"{round(win_rate, 1)}%"))
 
 def display_opening_stats(openings):
