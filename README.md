@@ -18,24 +18,24 @@ Chess.com game analyser built with Python and Streamlit. Takes in a player's Che
 ![Performance Trends](assets/Performance%20Trends.png)
 
 ## Live Demo
-[View Live Demo]](https://chess-analyser.streamlit.app/)
+[View Live Demo](https://chess-analyser.streamlit.app/)
 
 ## Run Locally
 
 1. Clone the repository
-\```
+```
 git clone https://github.com/hud-k/chess-analyser
-\```
+```
 
 2. Install dependencies
-\```
+```
 pip install -r requirements.txt
-\```
+```
 
 3. Run the app
-\```
+```
 streamlit run src/main.py
-\```
+```
 
 ## Tech stack
 - Python
