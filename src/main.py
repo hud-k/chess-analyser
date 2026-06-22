@@ -2,6 +2,10 @@ import streamlit as st
 import requests
 import datetime
 from display import display_colour_stats, display_opening_stats, opening_bar_chart, performance_trends
+import chess
+import chess.pgn
+import io
+import chess.engine
 
 LOSS_STATES = {"checkmated", "resigned", "abandoned", "timeout"}
 st.set_page_config(layout="wide")
@@ -82,6 +86,29 @@ def opening_stats(username, all_games):
             opening_dict[opening]["draws"]+=1
     return opening_dict
 
+def blunder_detection(username, all_games):
+    engine = chess.engine.SimpleEngine.popen_uci(r"C:\Users\Acer\Downloads\stockfish-windows-x86-64-avx2\stockfish\stockfish-windows-x86-64-avx2.exe")
+    ten_latest = all_games[-10:]
+    for game in ten_latest:
+        game_obj = chess.pgn.read_game(io.StringIO(game["pgn"]))
+        if game["white"]["username"].lower() == username.lower():
+            sign = 1
+        else:
+            sign = -1
+        prev_score = None
+        for node in game_obj.mainline():
+            info = engine.analyse(node.board(), chess.engine.Limit(time=0.1))
+            curr_score = info["score"].white().score()
+
+            if prev_score is not None and curr_score is not None:
+                score_swing = (curr_score - prev_score)*sign
+            else:
+                score_swing = 0
+            if score_swing <= -300:
+                st.write("blunder")  
+            prev_score = curr_score
+
+
 @st.cache_data(show_spinner=False)
 def fetch_games(username):
     headers = {"User-Agent": "Mozilla/5.0"}
@@ -122,6 +149,7 @@ if username:
     tab1, tab2, tab3 = st.tabs(["Colour Stats", "Openings", "Performance Trends"])
     with tab1:
         display_colour_stats(stats)
+        blunder_detection(username, all_games)
     with tab2:
         col1, col2 = st.columns(2)
         with col1:
@@ -132,4 +160,5 @@ if username:
     with tab3:
         performance_trends(monthly_stats)
     
-            
+    
+        
