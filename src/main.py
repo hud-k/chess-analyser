@@ -89,6 +89,10 @@ def opening_stats(username, all_games):
 def blunder_detection(username, all_games):
     engine = chess.engine.SimpleEngine.popen_uci(r"C:\Users\Acer\Downloads\stockfish-windows-x86-64-avx2\stockfish\stockfish-windows-x86-64-avx2.exe")
     ten_latest = all_games[-10:]
+    blunder_count = 0
+    white_blunders = 0
+    black_blunders = 0
+    blunder_moves = []
     for game in ten_latest:
         game_obj = chess.pgn.read_game(io.StringIO(game["pgn"]))
         if game["white"]["username"].lower() == username.lower():
@@ -105,9 +109,30 @@ def blunder_detection(username, all_games):
             else:
                 score_swing = 0
             if score_swing <= -300:
-                st.write("blunder")  
+                blunder_count +=1
+                blunder_moves.append(node.ply())
+                if sign == 1:
+                    white_blunders +=1
+                else:
+                    black_blunders +=1
             prev_score = curr_score
+    engine.quit()
+    return {"total blunders": blunder_count,
+            "white blunders": white_blunders,
+            "black blunders": black_blunders,
+            "blunder moves": blunder_moves}
 
+def blunder_stats(blunder_info):
+    avrg_blunders = blunder_info["total blunders"]/10
+    blunder_moves = blunder_info["blunder moves"]
+    if len(blunder_moves) > 0:
+        avrg_blunder_move = sum(blunder_moves)/len(blunder_moves)
+    else:
+        avrg_blunder_move = 0
+    return {"average blunders": avrg_blunders//2,
+            "average blunder move": avrg_blunder_move,
+            "white blunders": blunder_info["white blunders"],
+            "black blunders": blunder_info["black blunders"]}
 
 @st.cache_data(show_spinner=False)
 def fetch_games(username):
@@ -146,10 +171,9 @@ if username:
     stats = colour_stats(username, all_games)
     openings = opening_stats(username, all_games)
 
-    tab1, tab2, tab3 = st.tabs(["Colour Stats", "Openings", "Performance Trends"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Colour Stats", "Openings", "Performance Trends", "Blunder Insights"])
     with tab1:
         display_colour_stats(stats)
-        blunder_detection(username, all_games)
     with tab2:
         col1, col2 = st.columns(2)
         with col1:
@@ -159,6 +183,12 @@ if username:
             opening_bar_chart(data_frame)
     with tab3:
         performance_trends(monthly_stats)
-    
+    with tab4:
+        b_stats = blunder_stats(blunder_detection(username, all_games))
+        
+
+
+
+
     
         
