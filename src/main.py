@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 import datetime
-from display import display_colour_stats, display_opening_stats, opening_bar_chart, performance_trends
+from display import display_colour_stats, display_opening_stats, opening_bar_chart, performance_trends, display_blunder_insights
 import chess
 import chess.pgn
 import io
@@ -101,7 +101,7 @@ def blunder_detection(username, all_games):
             sign = -1
         prev_score = None
         for node in game_obj.mainline():
-            info = engine.analyse(node.board(), chess.engine.Limit(time=0.1))
+            info = engine.analyse(node.board(), chess.engine.Limit(time=0.05))
             curr_score = info["score"].white().score()
 
             if prev_score is not None and curr_score is not None:
@@ -129,8 +129,8 @@ def blunder_stats(blunder_info):
         avrg_blunder_move = sum(blunder_moves)/len(blunder_moves)
     else:
         avrg_blunder_move = 0
-    return {"average blunders": avrg_blunders//2,
-            "average blunder move": avrg_blunder_move,
+    return {"average blunders": round(avrg_blunders, 1),
+            "average blunder move": round(avrg_blunder_move / 2),
             "white blunders": blunder_info["white blunders"],
             "black blunders": blunder_info["black blunders"]}
 
@@ -185,7 +185,7 @@ if username:
         performance_trends(monthly_stats)
     with tab4:
         b_stats = blunder_stats(blunder_detection(username, all_games))
-        
+        display_blunder_insights(b_stats)
 
 
 
