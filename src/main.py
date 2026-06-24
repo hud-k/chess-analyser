@@ -93,7 +93,9 @@ def blunder_detection(username, all_games):
     white_blunders = 0
     black_blunders = 0
     blunder_moves = []
-    for game in ten_latest:
+    bar = st.progress(0)
+    for i, game in enumerate(ten_latest):
+        bar.progress((i + 1) / 10, text="Analysing games with Stockfish...")
         game_obj = chess.pgn.read_game(io.StringIO(game["pgn"]))
         if game["white"]["username"].lower() == username.lower():
             sign = 1
@@ -101,7 +103,7 @@ def blunder_detection(username, all_games):
             sign = -1
         prev_score = None
         for node in game_obj.mainline():
-            info = engine.analyse(node.board(), chess.engine.Limit(time=0.05))
+            info = engine.analyse(node.board(), chess.engine.Limit(depth=12))
             curr_score = info["score"].white().score()
 
             if prev_score is not None and curr_score is not None:

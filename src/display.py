@@ -45,7 +45,7 @@ def performance_trends(monthly_stats):
     st.line_chart(df, x="Date", y="Win rate %", x_label="Date (Year/Month/Day)", color="red")
 
 def display_blunder_insights(b_stats):
-    st.subheader("Blunder insights from your last 10 games")
+    st.subheader("Blunder insights from recent games")
     count, move, white, black = st.columns(4)
     count.metric(label="Average blunders per game", value=b_stats["average blunders"])
     move.metric(label="Average move blundered on", value=b_stats["average blunder move"])
