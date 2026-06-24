@@ -186,8 +186,9 @@ if username:
     with tab3:
         performance_trends(monthly_stats)
     with tab4:
-        b_stats = blunder_stats(blunder_detection(username, all_games))
-        display_blunder_insights(b_stats)
+        if st.button("Analyse my last 10 games"):
+            b_stats = blunder_stats(blunder_detection(username, all_games))
+            display_blunder_insights(b_stats)
 
 
 
