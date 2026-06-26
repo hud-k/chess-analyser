@@ -88,7 +88,7 @@ def opening_stats(username, all_games):
     return opening_dict
 
 def blunder_detection(username, all_games):
-    engine = chess.engine.SimpleEngine.popen_uci("stockfish")
+    engine = chess.engine.SimpleEngine.popen_uci("/usr/games/stockfish")
     ten_latest = all_games[-10:]
     blunder_count = 0
     white_blunders = 0
