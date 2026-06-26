@@ -152,6 +152,9 @@ def fetch_games(username):
 
     for month in recent_archives:
         game_response = requests.get(month, headers=headers)
+        response_json = game_response.json()
+        if 'games' not in response_json:
+            continue
         games = game_response.json()['games']
         monthly_win_rate(username, games, monthly_stats)
         for game in games:
