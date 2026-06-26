@@ -1,12 +1,13 @@
-import streamlit as st
-import requests
 import datetime
-from display import display_colour_stats, display_opening_stats, opening_bar_chart, performance_trends, display_blunder_insights
+import io
+
 import chess
 import chess.pgn
-import io
 import chess.engine
+import requests
+import streamlit as st
 
+from display import display_colour_stats, display_opening_stats, opening_bar_chart, performance_trends, display_blunder_insights
 LOSS_STATES = {"checkmated", "resigned", "abandoned", "timeout"}
 st.set_page_config(layout="wide")
 
